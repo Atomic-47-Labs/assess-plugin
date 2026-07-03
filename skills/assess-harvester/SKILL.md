@@ -9,6 +9,12 @@ description: >
 
 # assess-harvester — L0 public-signal harvest
 
+The quick deterministic pass: a fixed checklist against a **known domain**.
+It runs standalone for orgs with a resolved identity, and as **round 0** of
+assess-researcher's loop. If intake was a scant seed (no confident domain
+yet), dispatch assess-researcher instead — it resolves identity first, then
+runs this checklist inside its loop.
+
 **Reads:** org `profile.yaml`, vertical archetype `harvest_signals` map.
 **Writes:** nothing directly — every finding goes through `assess-state
 log-evidence` + `update-belief` (status `harvested`, confidence ≤ 0.8).

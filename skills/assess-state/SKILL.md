@@ -26,10 +26,17 @@ questions/, orgs/). Create any missing directories. Never overwrite existing
 files.
 
 ### new-org
+Intake accepts anything from full detail down to a **scant seed** — a company
+name, a domain, an email address, a half-remembered mention. Scant is fine:
+assess-researcher exists to build out from it.
+
 1. Read `manifest.yaml`, take `id_allocation.next_org`, format as `ORG-NNN`, increment and write back.
 2. Create `orgs/ORG-NNN/` with:
-   - `profile.yaml` — intake fields: name, website, vertical (must be an `active` vertical in manifest — refuse stubs), size_band, rd_mode, region, primary_contact, role_map (person → role_archetype list), created date.
-   - `beliefs.yaml` — instantiated from the vertical archetype: every category copied in with its prior candidates, each claim `status: inferred`, `confidence: <prior>`, `sources: [{type: archetype, version: N}]`. Plus empty `workflow_hotspots:` and `layer_status: {L0: pending, ...}`.
+   - `profile.yaml` — whatever intake provides: name, website, vertical, size_band, region, primary_contact, role_map, created date. Plus:
+     - `seed:` — the raw intake verbatim (what we were actually given)
+     - `identity:` — `{legal_name, domain, location, resolved_confidence}`; starts at whatever the seed supports (a bare name → `resolved_confidence: 0.3`). assess-researcher raises it.
+     - `vertical:` — must be an `active` vertical (refuse stubs), OR `unresolved` for scant seeds.
+   - `beliefs.yaml` — instantiated from the vertical archetype, or from `archetypes/_generic-baseline.yaml` when vertical is `unresolved`: every category copied in with its prior candidates, each claim `status: inferred`, `confidence: <prior>`, `sources: [{type: archetype, version: N}]`. Plus empty `workflow_hotspots:` and `layer_status: {L0: pending, ...}`.
    - `evidence.ndjson` — empty.
    - `questions/queue.yaml` — seeded from the vertical question bank, filtered by `applies_when` against profile, ranked provisionally by (criticality × form-effort).
    - `questions/asked.ndjson` — empty.
@@ -42,6 +49,21 @@ Rules:
 - Append the raw event to `evidence.ndjson` FIRST, then update `beliefs.yaml`. The ledger is append-only truth; beliefs are the materialized view.
 - Never average a contradiction. If the new claim conflicts with an existing `reported|confirmed` claim from a different source, keep both in the belief's `sources`, set `tension: true`, and add a tension-probe entry to `questions/queue.yaml` (top-ranked). Contradiction against an `inferred` prior simply replaces it — early answers should swing hard.
 - `confirmed` requires a `reported` or `observed` source; harvest alone caps at `harvested` (max confidence 0.8).
+
+### set-vertical
+Input: org id, vertical id (active only), rationale + confidence from the
+classifier (usually assess-researcher, operator-confirmed).
+Re-base beliefs onto the vertical's archetype:
+1. Log a `vertical_assigned` evidence line with the rationale.
+2. For every category in the new archetype: if the existing belief is still
+   archetype-inferred only, replace it with the vertical prior; if it carries
+   harvested/reported/confirmed sources, KEEP the claim and merely note the
+   vertical prior as an additional source. Never discard observed evidence.
+3. Add vertical-only categories and `workflow_hotspots`; drop `_generic-baseline`
+   placeholders (e.g. `industry_vertical_tools`).
+4. Re-seed `questions/queue.yaml` from the vertical's question bank (filtered
+   by `applies_when`), preserving pending tension probes.
+5. Update `profile.yaml vertical:`.
 
 ### log-evidence
 Append one NDJSON line: `{ts, org, kind: signal|answer|artifact|note, source, payload}`. Used by harvester (signals) and inquirer (answers) — they call this rather than touching the file.

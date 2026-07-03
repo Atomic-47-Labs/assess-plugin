@@ -22,7 +22,8 @@ QuickBooks, right?" takes 2 seconds; "list your finance systems" produces gaps.
 | Skill | What it does |
 |---|---|
 | `/assess-state` | Facility spine: init, validate, new-org, belief updates with provenance, append-only evidence ledger. Single writer of all state. |
-| `/assess-harvester` | L0 public-signal harvest — DNS/MX, SPF/DKIM, website fingerprint, job postings. Public sources only, all disclosed. |
+| `/assess-harvester` | L0 quick pass — fixed signal checklist against a known domain: DNS/MX, SPF/DKIM, website fingerprint, job postings. Public sources only, all disclosed. |
+| `/assess-researcher` | L0 deep pass — starts from seed info as scant as a company name: resolves identity, classifies the vertical, then runs a recursive expansion loop where every finding spawns the next queries, until the budget is spent or the trail runs dry. Writes a research dossier per org. |
 | `/assess-inquirer` | Chat-style adaptive question engine: one inference-anchored question at a time, re-ranked after every answer, hard time budgets. |
 | `/assess-scorer` | Six readiness dimensions scored 0–5 with confidence intervals that narrow by fidelity layer. Flags rubric recalibration after 10 assessments. |
 | `/assess-reporter` | L0 silhouette brief (door-opener), readiness report, opportunity map. Every claim carries provenance; scores never appear without intervals. |

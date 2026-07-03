@@ -20,7 +20,8 @@ skills it dispatches).
    pieces ("L1 blocked: payroll and crm_pipeline neither confirmed nor
    deferred; 2 questions, one respondent").
 3. Recommend exactly ONE next action:
-   - L0 pending → dispatch assess-harvester
+   - identity unresolved or vertical unresolved (scant-seed intake) → dispatch assess-researcher (resolves identity, classifies vertical, runs the expansion loop with harvest as round 0)
+   - L0 pending, identity resolved → assess-harvester alone (quick) or assess-researcher (standard/deep) by how much the org matters
    - L0 done, no contact yet → assess-reporter silhouette (the door-opener), then intake call
    - layer in progress → assess-inquirer session: WHO (role, per routing_rules), which budget, top-5 queue preview
    - tensions open → tension-probe session before anything else

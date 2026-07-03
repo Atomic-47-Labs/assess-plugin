@@ -1,0 +1,77 @@
+archetype: _generic-baseline
+label: Generic baseline (pre-vertical)
+status: baseline          # not a vertical — used when an org's vertical is unresolved
+version: 1
+notes: >
+  Universal system categories every org has, with segment-agnostic priors.
+  new-org instantiates beliefs from THIS when the vertical is unknown (scant
+  seed intake); assess-state set-vertical later re-bases onto the real
+  archetype, preserving all harvested/reported claims. Deliberately shallow —
+  its job is to give the researcher a frontier, not to be right.
+
+segments:
+  size_bands: [micro_1_10, small_11_40, medium_41_100, large_100_plus]
+
+categories:
+  email_collab:
+    criticality: high
+    candidates: {microsoft_365: 0.45, google_workspace: 0.45, other: 0.10}
+    fork_signal: MX record
+  chat:
+    criticality: medium
+    candidates_conditional:
+      if_microsoft_365: {teams: 0.65, slack: 0.25, email_only: 0.10}
+      if_google_workspace: {slack: 0.50, google_chat: 0.15, email_only: 0.35}
+  accounting:
+    criticality: high
+    candidates: {quickbooks_online: 0.45, sage: 0.15, xero: 0.15, erp: 0.10, other: 0.15}
+  payroll:
+    criticality: medium
+    candidates: {inside_accounting: 0.30, payroll_service: 0.50, other: 0.20}
+  project_task_management:
+    criticality: medium
+    candidates: {spreadsheets: 0.35, dedicated_tool: 0.35, none_adhoc: 0.30}
+  documents:
+    criticality: high
+    candidates_conditional:
+      if_microsoft_365: {sharepoint_onedrive: 0.85, local_and_email: 0.15}
+      if_google_workspace: {google_drive: 0.90, local_and_email: 0.10}
+  crm_pipeline:
+    criticality: medium
+    candidates: {none: 0.30, spreadsheet: 0.25, hubspot_or_similar: 0.30, salesforce: 0.15}
+  data_bi:
+    criticality: medium
+    candidates: {excel_only: 0.70, bi_tool: 0.20, none: 0.10}
+  industry_vertical_tools:
+    criticality: high
+    candidates: {unknown_pending_vertical: 1.0}
+    note: Placeholder branch — the researcher's vertical classification replaces this.
+  spreadsheet_email_glue:
+    criticality: high
+    candidates: {extensive: 0.70, moderate: 0.25, minimal: 0.05}
+    note: Every org has this layer; the question is only how load-bearing it is.
+
+workflow_hotspots:
+  reporting_rhythm:
+    what: Whatever recurring report/pack this org owes someone (board, funder, client, regulator)
+    prior_shape: Assembled by hand from asking people what happened.
+    probe: "What's the recurring report you dread, and how does it get made?"
+  the_chase:
+    what: The recurring collect-things-from-people workflow (timesheets, approvals, photos, signatures)
+    prior_shape: Email nagging plus a spreadsheet tracker.
+
+harvest_signals:
+  mx_records: forks email_collab
+  spf_dkim_includes: marketing/CRM/support tools
+  website_fingerprint: CMS, widgets, careers ATS, product language (feeds vertical classification)
+  job_postings: stack mentions, role mix, growth shape
+  linkedin_company: headcount band, role mix
+  corporate_registries: legal identity, incorporation date, jurisdiction
+
+opportunity_anchors:
+  - id: reporting_generation
+    what: Recurring reports drafted from maintained state instead of assembled by hand
+    requires: {process_digitization: ">=2"}
+  - id: glue_reduction
+    what: Replace the highest-traffic rekeying loop between two confirmed systems
+    requires: {spreadsheet_email_glue: "not minimal", integration_surface: "<=2"}
