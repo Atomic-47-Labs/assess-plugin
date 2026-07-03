@@ -1,0 +1,64 @@
+# Vertical archetype — template & schema reference
+# An archetype encodes your priors about orgs in one vertical: what systems
+# they probably run, which workflows hurt, what public signals reveal, and
+# what AI opportunities the assessment should map onto. Archetype quality is
+# where assessment value concentrates — hand-author v1 from experience, then
+# feed every completed assessment back into these priors.
+
+archetype: my-vertical            # must match the id in manifest verticals[]
+label: Human-readable name
+status: active                    # stub archetypes cannot be assessed against
+version: 1
+notes: >
+  Who this models (industry, size range, region) and the defining prior —
+  the one sentence a veteran consultant would say walking in the door.
+
+segments:
+  size_bands: [micro_1_10, small_11_40, medium_41_100]
+  # Add segment axes that fork your priors (e.g. product_mode, cert_mode).
+
+# Optional: per-vertical rubric adjustments, applied by assess-scorer.
+# rubric_overrides:
+#   governance_security: {weight: 0.25, note: regulated context}
+
+categories:
+  # One entry per system category. Priors must sum ≈ 1.0 per candidate set.
+  example_category:
+    criticality: high             # critical | high | medium | low — weights question ranking
+    candidates:
+      most_likely_tool: 0.45
+      second_tool: 0.30
+      spreadsheets_or_none: 0.25
+    fork_signal: which harvest signal or question collapses this branch fastest
+    note: what to probe beyond the tool name (adoption gaps, drift, owners)
+  # candidates_conditional lets one confirmed category re-weight another:
+  #   candidates_conditional:
+  #     if_microsoft_365: {teams: 0.7, slack: 0.2, email_only: 0.1}
+
+workflow_hotspots:
+  # The 3–6 workflows L2 must map. Each: what it is, your prior of its shape
+  # (stated so the walkthrough can open with "here's my guess — where am I
+  # wrong?"), and the opening probe.
+  example_hotspot:
+    what: one-line description
+    prior_shape: >
+      Your honest prior of how this workflow limps along — chases, rekeying,
+      reconstruction. Wrong priors are fine; corrections are information.
+    probe: "Walk me through the last time you did X, start to finish."
+
+harvest_signals:
+  # Public observables → which belief they update. Public sources only;
+  # every source consulted is disclosed in the report.
+  mx_records: forks email/collaboration stack
+  job_postings: stack mentions, role mix
+  website_fingerprint: CMS, widgets, careers-page ATS
+  # Add vertical-specific registries (license directories, certification
+  # databases, funding announcements — these are often the strongest signals).
+
+opportunity_anchors:
+  # What "AI-ready" unlocks in this vertical. The reporter evaluates each
+  # anchor's `requires:` against beliefs/scores → ready now | blocked (named
+  # blocker) | unknown (which question resolves it).
+  - id: example_anchor
+    what: concrete workflow outcome, stated in the org's own numbers when possible
+    requires: {example_category: "not none", data_accessibility: ">=2"}

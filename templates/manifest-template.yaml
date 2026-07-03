@@ -1,0 +1,41 @@
+# assess-state facility manifest — template
+# `/assess-state init` copies this to assess-state/manifest.yaml and fills the blanks.
+facility: assess-state
+version: 0.1.0
+created: YYYY-MM-DD
+description: Outside-in AI systems readiness assessment facility.
+
+verticals: []
+  # One entry per vertical you serve. Build each from the templates:
+  # - id: my-vertical
+  #   label: Human-readable name
+  #   status: active            # skills refuse to assess against status: stub
+  #   archetype: archetypes/my-vertical.yaml        # see archetype-template.yaml
+  #   roles: roles/my-vertical-roles.yaml           # see roles-template.yaml
+  #   questions: questions/my-vertical.yaml         # see questions-template.yaml
+
+scoring:
+  rubric: rubric/scoring-rubric-v1.yaml
+  rubric_version: 1
+  completed_assessments: 0
+  rubric_review_due_after: 10     # recalibrate the rubric after this many completed assessments
+  rubric_review_flagged: false
+
+id_allocation:
+  next_org: 1
+  format: "ORG-{NNN}"
+
+single_writer:
+  - manifest.yaml
+  - orgs/*/profile.yaml
+  - orgs/*/beliefs.yaml
+  - orgs/*/evidence.ndjson
+  - orgs/*/questions/queue.yaml
+  - orgs/*/questions/asked.ndjson
+
+layers:
+  L0: {name: silhouette, exit: "archetype applied + all harvest sources attempted"}
+  L1: {name: inventory,  exit: "every archetype category confirmed-present (named tool), confirmed-absent, or explicitly deferred"}
+  L2: {name: workflow,   exit: "all vertical workflow_hotspots mapped: system-of-record, handoffs, manual glue identified"}
+  L3: {name: data-integration, exit: "for each confirmed system: exportability, API access, and access-control posture recorded"}
+  L4: {name: human,      exit: "every role archetype present in org has capability/appetite/current-AI-usage recorded"}

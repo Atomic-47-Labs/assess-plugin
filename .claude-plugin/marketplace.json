@@ -1,0 +1,14 @@
+{
+  "name": "atomic47-assess",
+  "owner": {
+    "name": "Atomic 47 Labs",
+    "url": "https://github.com/Atomic-47-Labs"
+  },
+  "plugins": [
+    {
+      "name": "assess",
+      "source": "./",
+      "description": "Outside-in AI systems readiness assessment: probabilistic org model, fidelity layers L0→L4, inference-anchored adaptive questioning, confidence-interval scoring, opportunity maps."
+    }
+  ]
+}

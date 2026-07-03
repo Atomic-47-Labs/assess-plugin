@@ -1,0 +1,28 @@
+# Role archetypes — template & schema reference
+# L4 models roles, not persons. An org may collapse several roles into one
+# person — record that mapping in the org's profile.yaml role_map and ask
+# each theme once per person, not once per role.
+
+roles: my-vertical
+version: 1
+notes: Which role holds veto power or is the anchor respondent in this vertical, and any vocabulary rules.
+
+role_archetypes:
+
+  example_role:
+    typical_titles: [Title A, Title B]
+    optional: false               # true if often absent/collapsed at small size
+    touches: [category_a, category_b, hotspot_x(owner)]
+    routing_tags: [workflow, finance]   # questions route by matching tags
+    l4_themes:
+      # 2–4 themes the inquirer must cover with anyone in this role:
+      - the workflow pain only this role can quantify
+      - trust boundary — what they'd let software draft vs must touch themselves
+      - shadow AI usage, asked as an expected pattern rather than a confession
+
+routing_rules:
+  - L1 inventory → primary contact; specialist categories → the owning role
+  - L2 walkthroughs → the role that OWNS the hotspot (name the anchor session)
+  - L3 → most technical role present
+  - L4 → every present role; sample ground-truth roles (2–3 people minimum)
+  - disagreement between two roles on the same claim → tension probe to BOTH, separately, before recording

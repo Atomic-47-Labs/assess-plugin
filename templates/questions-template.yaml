@@ -1,0 +1,48 @@
+# Question bank — template & schema reference
+# Seed questions for the inquirer. Every question is phrased as an inference
+# to confirm or correct — never blank-slate recall. The inquirer renders
+# {inferred:*} slots from current beliefs and ranks by
+# expected_information_gain / effort within the session budget.
+
+question_bank: my-vertical
+version: 1
+notes: >
+  forms: confirm (binary, effort 1) | select (ranked options, effort 2) |
+  walkthrough (narrative, effort 4, chat-only, L2) | probe (tension/depth
+  follow-up, effort 2–3).
+
+questions:
+  - id: XX-L1-001
+    layer: L1                     # L1 inventory | L2 workflow | L3 data | L4 human
+    category: example_category    # L1 questions map to archetype categories
+    form: confirm
+    effort: 1
+    routing: [any]                # match against role routing_tags
+    template: "It looks like you're on {inferred:example_category} — is that right?"
+    on_answer: {confirm: {set_confidence: 0.95}, deny: {ask: XX-L1-001b}}
+
+  - id: XX-L2-001
+    layer: L2
+    hotspot: example_hotspot      # L2 questions map to workflow_hotspots
+    form: walkthrough
+    effort: 4
+    routing: [workflow]
+    template: >
+      Walk me through the last time you did X, start to finish. I'm expecting
+      something like: <your prior_shape, stated out loud>. Where am I wrong?
+    capture: [steps, systems_touched, handoffs, manual_glue, elapsed_time, pain_rank]
+
+  - id: XX-L4-001
+    layer: L4
+    form: probe
+    effort: 2
+    routing: [ground_truth]
+    template: "Most teams have a few people quietly pasting things into ChatGPT already — who here, and for what?"
+    note: Shadow usage asked as expected pattern, not confession.
+
+tension_probes:
+  usage: >
+    Generated dynamically when two respondents disagree or a self-report
+    contradicts a harvested observable. Restate both claims neutrally to each
+    party separately; ask which matches their last concrete instance. Record
+    the disagreement itself as a finding.

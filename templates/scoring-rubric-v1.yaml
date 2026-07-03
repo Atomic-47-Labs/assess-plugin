@@ -1,0 +1,111 @@
+rubric: ai-readiness-scoring
+version: 1
+created: 2026-07-03
+status: active
+review_policy: >
+  Initial rubric — deliberately provisional. assess-scorer increments
+  manifest scoring.completed_assessments on each L2+ completion; when it
+  reaches 10, flag rubric_review_flagged and prompt a calibration review:
+  compare scored predictions against what pilots actually revealed, re-anchor
+  levels, re-weight dimensions, bump to v2.
+
+scale:
+  min: 0
+  max: 5
+  note: Scores are always reported WITH the confidence interval for the fidelity layer reached.
+
+# CI half-widths by highest completed layer (per dimension; L4 narrows the
+# human dimensions further as noted below)
+confidence_intervals:
+  L0: 2.0
+  L1: 1.5
+  L2: 1.0
+  L3: 0.5
+  L4: 0.5   # plus: team_capability and leadership_alignment tighten from 1.0 → 0.5
+
+dimensions:
+
+  data_accessibility:
+    weight: 0.20
+    question: Where does the data live, and can it get out?
+    anchors:
+      0: Data lives on paper, in heads, or in inaccessible legacy systems.
+      1: Digital but trapped — PDFs, scattered personal spreadsheets, no shared structure.
+      2: Shared files exist (Drive/SharePoint) but no consistent structure or naming; exports possible but painful.
+      3: Core systems hold structured data; manual exports (CSV/XLSX) are routine.
+      4: Key systems expose APIs or scheduled exports; a shared source of truth exists for the most valuable data.
+      5: Data is centralized or federated with programmatic access, documented schemas, and known owners.
+
+  process_digitization:
+    weight: 0.20
+    question: Is the workflow in a system at all, or in email threads and memory?
+    anchors:
+      0: Core workflows undocumented and untracked; work moves by conversation.
+      1: Workflows live in email threads and ad-hoc spreadsheets; every instance is bespoke.
+      2: Some workflows have a designated system, but adoption is partial and side-channels dominate.
+      3: Core workflows have a system of record that most people actually use; exceptions handled manually.
+      4: Workflows are consistently executed in systems with defined states/stages; manual steps are known and bounded.
+      5: Workflows are systematized end-to-end with automation for routine steps.
+
+  integration_surface:
+    weight: 0.15
+    question: Do the systems talk, and how much human rekeying glues them?
+    anchors:
+      0: Every system is an island; all cross-system movement is retyping.
+      1: Copy-paste and re-key are the primary integration mechanism.
+      2: Occasional file-based transfer (export → import); at least one painful double-entry loop identified.
+      3: One or two native integrations in active use; rekeying persists at known choke points.
+      4: Key systems connected (native, Zapier/Make, or scripts); double-entry is the exception.
+      5: Integration is deliberate — an owner, an approach, and monitored data flows.
+
+  governance_security:
+    weight: 0.15
+    question: Access control, data sensitivity awareness, AI policy posture.
+    anchors:
+      0: Shared logins, no offboarding process, no notion of data sensitivity.
+      1: Individual accounts but ad-hoc permissions; no policy on data handling or AI use.
+      2: Basic access hygiene; awareness that some data is sensitive but no written guidance.
+      3: Role-based access on core systems; informal but real norms on data handling; AI use acknowledged but ungoverned.
+      4: Written data-handling and AI-use guidance exists and is known; access reviewed occasionally.
+      5: Governance is operational — policy, training, access review cadence, and an owner.
+
+  team_capability:
+    weight: 0.15
+    question: Skills, current AI usage (sanctioned + shadow), champions and skeptics.
+    anchors:
+      0: No current AI usage; low general software fluency; active resistance.
+      1: Isolated individual experimentation; no sharing; capability concentrated in one person.
+      2: Several people use AI tools personally (shadow usage); no shared practice.
+      3: Visible champions; some team-level habits forming; leadership aware and tolerant.
+      4: Sanctioned tools in use; practices shared across the team; onboarding includes them.
+      5: The team systematically develops AI capability — experimentation loops, shared prompts/workflows, measured results.
+
+  leadership_alignment:
+    weight: 0.15
+    question: Is there a why, an owner, and a budget?
+    anchors:
+      0: Leadership sees AI as irrelevant or threatening; no sponsor.
+      1: Vague interest ("we should do something with AI") with no owner or use case.
+      2: Genuine interest with at least one articulated use case; no owner or budget.
+      3: Named owner and a concrete near-term goal; budget conversation started.
+      4: Owner, budget, and priority use cases agreed; success criteria sketched.
+      5: AI adoption is an explicit strategic thread with resourcing, sequencing, and review cadence.
+
+aggregation:
+  method: weighted_mean
+  report_rule: >
+    Always show per-dimension scores with intervals; the aggregate is a
+    headline only and must never be shown without its interval.
+
+readiness_bands:
+  - {range: [0.0, 1.5], band: foundational, meaning: "Fix data and process basics before AI; AI pilots would automate chaos."}
+  - {range: [1.5, 3.0], band: emerging,     meaning: "Targeted AI wins available in the digitized pockets; pair with digitization work."}
+  - {range: [3.0, 4.0], band: ready,        meaning: "Systematic AI adoption is viable now; sequence by opportunity map."}
+  - {range: [4.0, 5.0], band: advanced,     meaning: "Compound: agentic workflows, integration-level automation."}
+
+scoring_evidence_rule: >
+  A dimension may only be scored from claims whose provenance is
+  reported-or-better for L1+ scoring; harvested/inferred claims cap that
+  dimension's score contribution at the L0 confidence interval. Self-reports
+  that contradict observables score from the observable, and the tension is
+  listed in the report.
