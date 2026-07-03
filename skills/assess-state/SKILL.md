@@ -68,6 +68,22 @@ Re-base beliefs onto the vertical's archetype:
 ### log-evidence
 Append one NDJSON line: `{ts, org, kind: signal|answer|artifact|note, source, payload}`. Used by harvester (signals) and inquirer (answers) — they call this rather than touching the file.
 
+### new-session / update-live / close-session
+Live-session state for assess-live, under `sessions/SES-NNN/`:
+- **new-session**: allocate SES-NNN (manifest `sessions.next_session`), create
+  `session.yaml` (org link, mode, started), `live.json` (`{"status":"waiting"}`),
+  empty `responses.ndjson`.
+- **update-live**: rewrite `live.json` whole (org board, story beats, current
+  question, sources panel). It is a render feed, not a ledger — anything worth
+  keeping must also land in the org's evidence via log-evidence.
+- **close-session**: mark session.yaml ended, append a `session_held` evidence
+  line to the linked org (mode, questions asked, confirmed/corrected/tension
+  counts), and leave the session dir as the archive.
+
+Ownership exception: `sessions/*/responses.ndjson` is written by the stage
+server (audience inbox, append-only) — assess-state and assess-live only read
+and ingest it.
+
 ### update-layer
 Set `layer_status.<L>` to `pending|in_progress|complete` after checking the layer's exit criterion from `manifest.yaml layers`. Refuse `complete` if the criterion isn't met; state what's missing.
 

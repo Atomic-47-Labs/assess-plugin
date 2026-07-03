@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>assess · live</title>
+<style>
+  :root{--bg:#0c0f14;--panel:#141924;--line:#232b3a;--txt:#e8edf6;--dim:#8a96ab;
+        --inf:#5b6a85;--har:#c9a227;--rep:#3fa46a;--con:#2fbf71;--ten:#e0564f;--acc:#4f9cf9}
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--bg);color:var(--txt);font:16px/1.45 -apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+  .wrap{max-width:1500px;margin:0 auto;padding:22px}
+  header{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:26px;font-weight:700}
+  h1 small{color:var(--dim);font-weight:400;font-size:15px;margin-left:10px}
+  .meter{display:flex;align-items:center;gap:10px;color:var(--dim);font-size:14px}
+  .meter b{color:var(--txt)}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+  /* belief board */
+  .cat{display:grid;grid-template-columns:200px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+  .cat:last-child{border-bottom:0}
+  .cat .name{color:var(--dim);font-size:14px}
+  .cat .claim{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar{height:7px;border-radius:4px;background:var(--line);position:relative;margin-top:5px;overflow:hidden}
+  .bar i{position:absolute;inset:0;width:0;border-radius:4px;transition:width .8s ease, background .8s ease}
+  .tag{font-size:11px;padding:2px 8px;border-radius:9px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+  .s-inferred i{background:var(--inf)} .s-harvested i{background:var(--har)}
+  .s-reported i{background:var(--rep)} .s-confirmed i{background:var(--con)}
+  .tension .claim{color:var(--ten)} .tension .tag{color:var(--ten);border-color:var(--ten)}
+  .flash{animation:fl 1.2s ease}
+  @keyframes fl{0%{background:rgba(79,156,249,.25)}100%{background:transparent}}
+  /* story feed */
+  #story{display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow-y:auto}
+  .beat{padding:11px 13px;border-left:3px solid var(--acc);background:rgba(79,156,249,.06);border-radius:0 9px 9px 0;font-size:15px}
+  .beat .src{display:block;margin-top:4px;color:var(--dim);font-size:12px}
+  .beat.new{animation:slide .5s ease}
+  @keyframes slide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  /* question strip */
+  .qstrip{margin-top:16px;padding:18px}
+  .qstrip .q{font-size:22px;font-weight:600;margin-bottom:12px}
+  .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .opt{position:relative;border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:17px;min-width:150px;overflow:hidden;background:none;color:var(--txt);text-align:left}
+  .opt .fill{position:absolute;inset:0;background:rgba(79,156,249,.22);width:0;transition:width .6s ease;z-index:0}
+  .opt span{position:relative;z-index:1}
+  .opt .pct{float:right;color:var(--dim);margin-left:14px}
+  .guess{margin-top:10px;color:var(--har);font-size:15px}
+  .respond-cta{color:var(--dim);font-size:14px;margin-top:12px}
+  .respond-cta b{color:var(--acc);font-size:17px}
+  /* sources */
+  #sources{color:var(--dim);font-size:12.5px;line-height:1.7}
+  /* respond mode */
+  .respond .opt{width:100%;padding:20px;font-size:19px;margin-bottom:10px;cursor:pointer}
+  .respond .opt:active{background:rgba(79,156,249,.25)}
+  .respond textarea{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:12px;font-size:16px;min-height:70px}
+  .respond .send{margin-top:10px;background:var(--acc);border:0;border-radius:10px;color:#fff;padding:14px;width:100%;font-size:17px;cursor:pointer}
+  .done{color:var(--con);font-size:20px;text-align:center;padding:30px 0}
+  .waiting{color:var(--dim);text-align:center;padding:40px 0;font-size:18px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="waiting">connecting…</div></div>
+<script>
+const MODE='__MODE__', RESPOND_URL='__RESPOND_URL__';
+let last=null, answered={}, beatCount=0;
+async function poll(){
+  try{
+    const s=await (await fetch('/api/state')).json();
+    render(s); last=s;
+  }catch(e){}
+  setTimeout(poll, MODE==='stage'?1500:2000);
+}
+function esc(t){const d=document.createElement('div');d.textContent=t==null?'':String(t);return d.innerHTML}
+function render(s){
+  const app=document.getElementById('app'), L=s.live||{};
+  if(L.status==='waiting'||!L.org){app.innerHTML='<div class="waiting">'+esc(L.message||'session starting…')+'</div>';return}
+  if(MODE==='respond'){renderRespond(app,L,s);return}
+  const org=L.org, cats=org.categories||[], beats=L.story||[], q=L.current_question, t=s.tally;
+  let h='<header><h1>'+esc(org.name)+'<small>'+esc(org.tagline||'live readiness assessment')+'</small></h1>'
+    +'<div class="meter">layer <b>'+esc(org.layer||'L0')+'</b> · confirmed <b>'+(org.confirmed||0)+'</b> · corrected <b>'+(org.corrected||0)+'</b> · tensions <b>'+(org.tensions||0)+'</b></div></header>';
+  h+='<div class="grid"><div class="panel"><h2>What we think we know</h2>';
+  for(const c of cats){
+    h+='<div class="cat s-'+esc(c.status)+(c.tension?' tension':'')+(c.changed?' flash':'')+'">'
+      +'<div class="name">'+esc(c.label)+'</div>'
+      +'<div><div class="claim">'+esc(c.claim||'—')+'</div><div class="bar"><i style="width:'+Math.round((c.confidence||0)*100)+'%"></i></div></div>'
+      +'<div class="tag">'+esc(c.tension?'tension':c.status)+' '+Math.round((c.confidence||0)*100)+'%</div></div>';
+  }
+  h+='</div><div><div class="panel"><h2>The story so far</h2><div id="story">';
+  for(let i=0;i<beats.length;i++){
+    h+='<div class="beat'+(i>=beatCount?' new':'')+'">'+esc(beats[i].text)+'<span class="src">'+esc(beats[i].source||'')+'</span></div>';
+  }
+  h+='</div></div>';
+  if(L.sources&&L.sources.length){h+='<div class="panel" style="margin-top:16px"><h2>Public sources we touched</h2><div id="sources">'+L.sources.map(esc).join(' · ')+'</div></div>';}
+  h+='</div></div>';
+  if(q){
+    h+='<div class="panel qstrip"><div class="q">'+esc(q.text)+'</div><div class="opts">';
+    const n=(t&&t.n)||0;
+    for(const o of q.options||[]){
+      const c=(t&&t.counts&&t.counts[o])||0, pct=n?Math.round(c/n*100):0;
+      h+='<div class="opt"><div class="fill" style="width:'+(q.reveal?pct:0)+'%"></div><span>'+esc(o)+(q.reveal?'<span class="pct">'+pct+'%</span>':'')+'</span></div>';
+    }
+    h+='</div>';
+    if(q.model_guess)h+='<div class="guess">our guess: <b>'+esc(q.model_guess)+'</b> ('+Math.round((q.model_confidence||0)*100)+'% sure)'+(q.reveal?'':' — lock in your answers…')+'</div>';
+    h+='<div class="respond-cta">'+n+' response'+(n===1?'':'s')+' · answer at <b>'+esc(s.respond_url||RESPOND_URL)+'</b></div></div>';
+  }
+  app.innerHTML=h; beatCount=beats.length;
+  const st=document.getElementById('story'); if(st)st.scrollTop=st.scrollHeight;
+}
+function renderRespond(app,L,s){
+  const q=L.current_question;
+  if(!q){app.innerHTML='<div class="respond"><div class="waiting">'+esc(L.org?L.org.name:'')+'<br><br>waiting for the next question…</div></div>';return}
+  if(answered[q.id]){app.innerHTML='<div class="respond"><div class="done">✓ got it — watch the screen</div></div>';return}
+  let h='<div class="respond"><header><h1 style="font-size:19px">'+esc(L.org.name)+'</h1></header>'
+    +'<div class="panel"><div class="q" style="font-size:19px;margin-bottom:14px">'+esc(q.text)+'</div>';
+  for(const o of q.options||[]) h+='<button class="opt" onclick="vote(\''+esc(q.id)+'\',this.dataset.o)" data-o="'+esc(o)+'"><span>'+esc(o)+'</span></button>';
+  if(q.allow_other!==false) h+='<textarea id="other" placeholder="or tell us how it actually works…"></textarea><button class="send" onclick="voteOther(\''+esc(q.id)+'\')">send</button>';
+  h+='</div></div>';
+  app.innerHTML=h;
+}
+async function vote(qid,answer,note){
+  answered[qid]=1;
+  try{await fetch('/api/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({qid,answer,note})})}catch(e){}
+  render(last||{live:{}});
+}
+function voteOther(qid){const v=document.getElementById('other').value.trim();if(v)vote(qid,'other',v)}
+poll();
+</script>
+</body>
+</html>

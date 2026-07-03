@@ -1,7 +1,7 @@
 {
   "name": "assess",
   "description": "Outside-in AI systems readiness assessment. Builds a probabilistic model of an organization's systems before asking anything — starting from seed info as scant as a company name — then layers fidelity L0 (silhouette) → L4 (human) through recursive research and inference-anchored questioning. Skills: assess-state, assess-researcher, assess-harvester, assess-inquirer, assess-scorer, assess-reporter, assess-orchestrator.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Atomic 47 Labs",
     "url": "https://github.com/Atomic-47-Labs"

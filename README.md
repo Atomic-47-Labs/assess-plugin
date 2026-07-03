@@ -28,6 +28,7 @@ QuickBooks, right?" takes 2 seconds; "list your finance systems" produces gaps.
 | `/assess-scorer` | Six readiness dimensions scored 0–5 with confidence intervals that narrow by fidelity layer. Flags rubric recalibration after 10 assessments. |
 | `/assess-reporter` | L0 silhouette brief (door-opener), readiness report, opportunity map. Every claim carries provenance; scores never appear without intervals. |
 | `/assess-orchestrator` | Conductor: frontier layer, what blocks exit, who to talk to next. One recommendation at a time. |
+| `/assess-live` | Live audience sessions: background research strands land as story beats on a projected stage while the room answers on their phones — beat-the-model reveals, split-vote tension theater. Bundled zero-dependency stage server (port 3377). |
 
 ## Fidelity layers
 
